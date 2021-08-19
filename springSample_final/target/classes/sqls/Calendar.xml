@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+ <mapper namespace="Calendar">
+ 	
+ 	<select id="getList" parameterType="bit.com.a.dto.CalendarDto" resultType="bit.com.a.dto.CalendarDto">
+ 		SELECT SEQ, ID, TITLE, CONTENT, RDATE, WDATE, IMPORTANT
+ 		FROM (SELECT ROW_NUMBER()OVER(PARTITION BY SUBSTR(RDATE, 1, 8) ORDER BY RDATE ASC) AS RNUM,
+ 					SEQ, ID, TITLE, CONTENT, RDATE, WDATE, IMPORTANT
+ 					FROM CALENDARS
+ 					WHERE ID=#{ id } AND SUBSTR(RDATE, 1, 6)=#{ rdate })
+ 		WHERE RNUM BETWEEN 1 AND 5
+ 	</select>
+ 	
+ 	<insert id="addCal" parameterType="bit.com.a.dto.CalendarDto">
+ 		INSERT INTO CALENDARS(SEQ, ID, TITLE, CONTENT, RDATE, WDATE, IMPORTANT)
+ 		VALUES(SEQ_CALL.NEXTVAL, #{ id }, #{ title }, #{ content }, #{ rdate }, SYSDATE, #{ important })
+ 	</insert>
+ 	
+ 	<select id="getCal" parameterType="Integer" resultType="bit.com.a.dto.CalendarDto">
+ 		SELECT *
+ 		FROM CALENDARS
+ 		WHERE SEQ=#{ seq }
+ 	</select>
+ 	
+ 	<update id="updateCal" parameterType="bit.com.a.dto.CalendarDto">
+ 		UPDATE CALENDARS
+ 		SET TITLE=#{ title }, CONTENT=#{ title }, RDATE=#{ rdate }, IMPORTANT=#{ important }
+ 		WHERE SEQ=#{ seq }
+ 	</update>
+ 	
+ 	<delete id="deleteCal" parameterType="Integer">
+ 		DELETE FROM CALENDARS
+ 		WHERE SEQ=#{ seq }
+ 	</delete>
+ 	
+ 	<select id="getDateList" parameterType="bit.com.a.dto.CalendarDto" resultType="bit.com.a.dto.CalendarDto">
+ 		SELECT SEQ, ID, TITLE, CONTENT, RDATE, WDATE, IMPORTANT
+ 		FROM CALENDARS
+ 		WHERE ID=#{ id } AND SUBSTR(RDATE, 1, 8)=#{ rdate }
+ 		ORDER BY RDATE ASC 
+ 	</select>
+ 	
+ 	<select id="calSearch" parameterType="bit.com.a.dto.SearchDto" resultType="bit.com.a.dto.CalendarDto">
+ 		SELECT SEQ, ID, TITLE, CONTENT, RDATE, WDATE, IMPORTANT
+ 		FROM (SELECT ROW_NUMBER()OVER(ORDER BY RDATE ASC) AS RNUM,
+ 					SEQ, ID, TITLE, CONTENT, RDATE, WDATE, IMPORTANT
+ 					FROM CALENDARS
+ 					WHERE 1=1
+	 			  	<if test="choice == 'title'">
+	 			  		AND TITLE LIKE '%'||#{ search }||'%'
+	 			 	</if>
+			 		<if test="choice == 'content'">
+			 			AND CONTENT LIKE '%'||#{ search }||'%'
+			 		</if>
+		 			<if test="startDate != null and startDate != '' and endDate != null and endDate != ''">
+		 				AND SUBSTR(RDATE, 1, 8) BETWEEN #{startDate} AND #{endDate}
+		 			</if>
+		 			 ORDER BY RDATE ASC)
+		 WHERE RNUM BETWEEN 1 + (10*#{pageNumber}) AND 10 + (10*#{pageNumber})
+ 	</select>
+ 	
+ 	<select id="allCal" parameterType="bit.com.a.dto.SearchDto" resultType="Integer">
+		SELECT NVL(COUNT(*), 0)
+		FROM CALENDARS
+		WHERE 1=1
+		<if test="choice == 'title'">
+	  		AND TITLE LIKE '%'||#{ search }||'%'
+	 	</if>
+		<if test="choice == 'content'">
+			AND CONTENT LIKE '%'||#{ search }||'%'
+		</if>
+		<if test="startDate != null and startDate != '' and endDate != null and endDate != ''">
+			AND SUBSTR(RDATE, 1, 8) BETWEEN #{startDate} AND #{endDate}
+		</if>
+	</select>
+ </mapper>

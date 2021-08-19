@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+<mapper namespace="CalPlug">
+  <select id="getCalendarPlugList" parameterType="bit.com.a.dto.CalendarPlugDto" resultType="bit.com.a.dto.CalendarPlugDto">
+  	SELECT SEQ, ID, SLEVEL, TITLE, CONTENT, STARTDATE, ENDDATE, WDATE
+  	FROM CALENDARPLUG
+  	WHERE ID=#{id}
+  </select>
+  <insert id="addCalPulg" parameterType="bit.com.a.dto.CalendarPlugDto">
+  	INSERT INTO CALENDARPLUG(SEQ, ID, SLEVEL, TITLE, CONTENT, STARTDATE, ENDDATE, WDATE)
+  	VALUES(SEQ_CALPLUG.NEXTVAL, #{id}, 1, #{title}, #{content}, #{startdate}, #{enddate}, SYSDATE)
+  </insert>
+</mapper>
