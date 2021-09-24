@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<style type="text/css">
+li{
+	display: inline-block;
+	list-style: none;
+	margin-left: 30px;
+}
+.navbox{
+	width: 400px;
+	height: 30px;
+	margin: 30px auto;
+	background-color: #E6E6E6;
+	border-radius: 5px;
+	box-shadow: 3px 3px 3px 2px #F2F2F2;
+}
+.list_table{
+	border-collapse: collapse;
+}
+</style>
+</head>
+<body>
+<div class="navbox">
+	<ul class="navbar">
+		<li><a href="bbswrite.html">글쓰기</a></li>
+		<li><a href="bbslist.html">게시판</a></li>
+		<li><a href="#none">로그아웃</a></li>
+	</ul>
+</div>
+
+<div align="center">
+	<h1>글수정</h1>
+	<table border="1" class="list_table" id="_list_table">
+	<col width="100"><col width="300">
+		<tr>
+			<th>아이디</th>
+			<td>
+				<input type="text" id="id" size="30" readonly>
+			</td>
+		</tr>
+		<tr>
+			<th>제목</th>
+			<td>
+				<input type="text" id="title" size="30">
+			</td>
+		</tr>
+		<tr>
+			<th>내용</th>
+			<td>
+				<textarea rows="20px" cols="80px" id="content"></textarea>
+			</td>
+		</tr>
+	</table>
+	<input type="button" id="writeBtn" value="수정완료">
+</div>
+
+<script type="text/javascript">
+$(document).ready(function() {
+	$('#id').val(sessionStorage.getItem('login'));
+	let temp = location.href.split("?");
+	
+	$.ajax({
+		url:"http://localhost:3000/getBbs",
+		data: {seq:temp[1]},
+		success:function(bbs){
+			$("#title").val(bbs.title);
+			$("#content").text(bbs.content);
+		},
+		error:function(){
+			
+		}
+	});
+
+	$("#writeBtn").click(function() {
+		
+		$.ajax({
+			url:"http://localhost:3000/bbsupdate",
+			data: { seq:temp[1], title:$("#title").val(), content:$("#content").html() },
+			success:function(msg){
+				if(msg == 'success'){
+					alert('성공적으로 글수정하였습니다');
+					location.href = "bbslist.html";
+				}else{
+					alert('글수정 실패하셨습니다');
+					location.href = "bbslist.html";
+				}
+			},
+			error:function(){
+				alert('error');
+			}
+		});
+	});
+});
+</script>
+</body>
+</html>

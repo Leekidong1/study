@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>회원가입</title>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+</head>
+<body>
+
+<div align="center">
+<h3>회원가입</h3>
+	<table border="1">
+		<tr>
+			<th>아이디</th>
+			<td>
+			<input type="text" id="id">
+			<div id="idmsg"></div>
+			<button type="button" id="idcheck" >아이디 체크</button>
+			</td>
+		</tr>
+		<tr>
+			<th>비밀번호</th>
+			<td>
+			<input type="password" id="pw">
+			</td>
+		</tr>
+		<tr>
+			<th>이름</th>
+			<td>
+			<input type="text" id="name">
+			</td>
+		</tr>
+		<tr>
+			<th>이메일</th>
+			<td>
+			<input type="email" id="email">
+			</td>
+		</tr>
+	</table><br>
+	<input type="button" id="regiBtn" value="가입하기">
+	<input type="button" onclick="location.href='index.jsp'" value="가입취소">
+</div>
+<script type="text/javascript">
+$(document).ready(function() {	
+	$("#idcheck").click(function() {
+		if($("#id").val() == ""){
+			alert("아이디를 입력해주세요");
+			return;
+		}
+		
+		let id = $("#id").val().trim();
+		
+		$.ajax({
+			url:"http://localhost:3000/idcheck",
+			type:"post",
+			data:{"id":id},
+			success:function(data){
+				if(data.trim() == 'success'){
+					$("#idmsg").html("이미 존재하는 아이디입니다").css("color","red");
+					$("#id").val("");
+				}else{
+					$("#idmsg").html("가입하실 수 있는 아이디입니다").css("color","blue");
+				}
+			},
+			error:function(){
+				alert('error');
+			}
+		});
+		
+	});
+	
+	$("#regiBtn").click(function() {
+		if($("#id").val() == "" || $("#pw").val() == "" ||$("#name").val() == "" ||$("#email").val() == ""){
+			if($("#id").val() == ""){
+				alert("아이디를 입력해주세요");
+			}
+			if($("#pw").val() == ""){
+				alert("비밀번호를 입력해주세요");
+			}
+			if($("#name").val() == ""){
+				alert("이름을 입력해주세요");
+			}
+			if($("#email").val() == ""){
+				alert("이메일을 입력해주세요");
+			}
+			return;
+		}
+		
+		// $("#frm").serialize(); 로 위 id,pw,name,email 한번에 묶어서 controller로 보낼 수 있다.
+		$.ajax({
+			url:"http://localhost:3000/regi",
+			type:"post",
+			data:{ id:$("#id").val(), pw:$("#pw").val(), name:$("#name").val(), email:$("#email").val()},	
+			success:function(data){
+				if(data == 'success'){
+					alert("회원가입 성공~!");
+					location.href = "login.html";
+				}else{
+					alert("회원가입 실패");
+					location.href = "regi.html";
+				}
+			},
+			error:function(){
+				alert('error');
+			}
+		});
+		
+	});
+});
+
+</script>
+
+</body>
+</html>

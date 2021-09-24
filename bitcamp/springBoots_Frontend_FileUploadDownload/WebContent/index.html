@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+</head>
+<body>
+
+<h3>upload file</h3>
+<form id="upload_file_frm">
+	<input type="file" id="_uploadFile" name="uploadFile" accept="*">
+	<button type="button" id="uploadFileBtn">파일 업로드</button>
+	<p id="uploadResult"></p>
+</form>
+
+<script type="text/javascript">
+$(document).ready(function() {
+	
+	$("#uploadFileBtn").click(function() {
+		$.ajax({
+			url:"http://localhost:3000/fileUpload",
+			type:"post",
+			data:new FormData( $("#upload_file_frm")[0] ),
+			enctype: 'multipart/form-data',
+			processData:false,
+			contentType:false,
+			cache:false,	// Session와 같이 저장을 위한 것.	session은 서버에 저장. cookie는 브라우저에 저장. cache는 임시저장개념
+			success:function(msg){
+				alert('success');
+				$("#uploadResult").text(msg);
+			},
+			error:function(){
+				alert('error');
+			}
+		});
+	});
+});
+</script>
+
+
+<h3>download file</h3>
+<button type="button" id="downLoadBtn">파일 다운로드</button>
+
+<script type="text/javascript">
+$("#downLoadBtn").click(function() {
+	
+	location.href = "http://localhost:3000/fileDownload?fileName=" + "yoga.jpg";
+	
+	/*	다운로드 안됨
+	$.ajax({
+		url:"http://localhost:3000/fileDownload",
+		type:"get",
+		data:{ fileName:"yoga.jpg"},
+		success:function(){
+			alert('success');
+		},
+		error:function(){
+			alert('error');
+		}
+	});
+	*/
+});
+
+</script>
+</body>
+</html>
+
+
+
+
+
+
+

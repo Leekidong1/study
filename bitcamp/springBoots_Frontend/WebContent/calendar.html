@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<style type="text/css">
+li{
+	display: inline-block;
+	list-style: none;
+}
+.navbox{
+	width: 550px;
+	margin: 30px auto;
+	background-color: #E6E6E6;
+	border-radius: 5px;
+	box-shadow: 3px 3px 3px 2px #F2F2F2;
+	padding-left: 50px;
+	padding-right: 50px;
+}
+#_list_table{
+	border-collapse: collapse;
+}
+</style>
+</head>
+<body>
+<div class="navbox">
+	<ul class="navbar">
+		<li><a href="calsearch.html" style="color: gray;">일정검색</a></li>|
+		<li><a href="bbslist.html">게시판</a></li>
+		<li><a href="pdslist.html">자료실</a></li>
+		<li><a href="calendar.html">일정관리</a></li>
+		<li><a href="#none">로그아웃</a></li>
+	</ul>
+</div>
+
+<div align="center">
+	<table border="1" style="width: 1000px;" id="_list_table">
+	</table>
+</div>
+<script type="text/javascript">
+$(document).ready(function() {
+	$("#_list_table").empty();
+	let userid = sessionStorage.getItem('login');
+	let temp = location.href.split("?");
+	
+	$.ajax({
+		url:"http://localhost:3000/calendar",
+		data: { syear:temp[1], smonth:temp[2], id:userid },
+		success:function(map){
+		//	alert('success');
+			col()
+			$("#_list_table").append(map.cal_thead);
+			$("#_list_table").append(map.cal_tbody);
+			
+		},
+		error:function(){
+			alert('error');
+		}
+	});	
+});
+function col() {
+	let str = '<col width="100"><col width="100"><col width="100"><col width="100">' +
+		      '<col width="100"><col width="100"><col width="100">';
+	$("#_list_table").append(str);
+}
+
+</script>
+</body>
+</html>

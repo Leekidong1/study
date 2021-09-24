@@ -1,0 +1,38 @@
+/*
+킬로그램이 스캐너로 입력되었을때,
+상근이가 배달해야하는 봉지의 최소 개수를 출력합니다.
+만약 3킬로그램 혹은 5킬로그램 봉지로 딱 떨어지게 만들 수 없다면 -1을 출력합니다.
+*/
+
+
+import java.util.Scanner;
+
+class CodeRunner{
+	public static void main(String[] args){
+		Scanner sc = new Scanner(System.in); 
+        
+        int sugar = sc.nextInt(); 
+        
+        if(sugar%5 ==0) { 
+            System.out.println(sugar/5); 
+            return; 
+        }else { 
+            int five = sugar/5; 
+            for(int i=five; i>0; i--) { 
+                int tempsugar = sugar-(i*5); 
+                if(tempsugar %3 == 0) { 
+                    System.out.println(i+(tempsugar/3)); 
+                    return; 
+                } 
+            } 
+        } 
+        
+        if(sugar%3==0) { 
+            System.out.println(sugar/3); 
+        }
+        else { 
+            System.out.println(-1); 
+        }
+        
+	}
+}
