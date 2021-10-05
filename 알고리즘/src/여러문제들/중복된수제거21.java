@@ -1,4 +1,4 @@
-package 알고리즘;
+package 여러문제들;
 
 public class 중복된수제거21 {
 
@@ -10,7 +10,7 @@ public class 중복된수제거21 {
 			swit[arr[i]] = true;
 		}
 		
-		for(int i=0; i<arr.length; i++) {
+		for(int i=0; i<swit.length; i++) {
 			if(swit[i] == true) {
 				System.out.print(i+" ");
 			}

@@ -1,11 +1,11 @@
-package 여러문제들;
+package 탐색;
 
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.Scanner;
 import java.util.Stack;
 
-public class 탐색_dfs_bfs {
+public class DFS_BFS {
 	
 	
 	public static void main(String[] args) {
