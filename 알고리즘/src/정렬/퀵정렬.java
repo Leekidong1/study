@@ -35,7 +35,7 @@ public class 퀵정렬 {
 		int[] arr = {3,9,4,7,5,0,1,6,8,2};
 		int startIdx = 0;
 		int endIdx = arr.length-1;
-		
+		System.out.println(Arrays.toString(arr));
 		quickSort(arr,startIdx,endIdx);
 		
 		System.out.println(Arrays.toString(arr));

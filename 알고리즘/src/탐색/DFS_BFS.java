@@ -1,5 +1,6 @@
 package 탐색;
 
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.Scanner;
@@ -40,7 +41,12 @@ public class DFS_BFS {
 		arr[5][4] = 1;
 		arr[4][6] = 1;
 		arr[6][4] = 1;
-		
+		for(int i=0; i<arr.length; i++) {
+			for(int j=0; j<arr[i].length; j++) {
+				System.out.print(arr[i][j]);
+			}
+			System.out.println();
+		}
 		dfs(arr,check,startNum);
 //		bfs(arr,check,startNum);
 	}
