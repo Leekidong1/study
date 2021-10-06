@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+  <mapper namespace="bit.com.a.dao.PdsDao">
+  	<select id="getTotalList" parameterType="bit.com.a.dto.SearchDto" resultType="bit.com.a.dto.PdsDto">
+ 		SELECT SEQ, ID, REF, STEP, DEPTH, TITLE, CONTENT, FILENAME, NEWFILENAME, READCOUNT, DOWNCOUNT, REGDATE
+ 		FROM (SELECT ROW_NUMBER()OVER(ORDER BY REF DESC, STEP ASC) AS RNUM,
+ 					SEQ, ID, REF, STEP, DEPTH, TITLE, CONTENT, FILENAME, NEWFILENAME, READCOUNT, DOWNCOUNT, REGDATE
+ 					FROM PDS
+ 					WHERE 1=1
+	 			  	<if test="choice == 'writer'">
+				  		AND ID=#{search}
+				 	</if>
+					<if test="choice == 'title'">
+				  		AND TITLE LIKE '%'||#{search}||'%'
+				 	</if>
+					<if test="choice == 'content'">
+						AND CONTENT LIKE '%'||#{search}||'%'
+					</if>
+					<if test="choice == 'filename'">
+						AND FILENAME LIKE '%'||#{search}||'%'
+					</if>
+					<if test="startDate != null and startDate != '' and endDate != null and endDate != ''">
+						AND TO_CHAR(REGDATE, 'YYYYMMDD') BETWEEN #{startDate} AND #{endDate}
+					</if>
+		 			 ORDER BY REF DESC, STEP ASC)
+		 WHERE RNUM BETWEEN 1 + (10*#{pageNumber}) AND 10 + (10*#{pageNumber})
+ 	</select>
+ 	
+ 	<select id="allPds" parameterType="bit.com.a.dto.SearchDto" resultType="Integer">
+		SELECT NVL(COUNT(*), 0)
+		FROM PDS
+		WHERE 1=1
+		<if test="choice == 'writer'">
+	  		AND ID=#{search}
+	 	</if>
+		<if test="choice == 'title'">
+	  		AND TITLE LIKE '%'||#{search}||'%'
+	 	</if>
+		<if test="choice == 'content'">
+			AND CONTENT LIKE '%'||#{search}||'%'
+		</if>
+		<if test="choice == 'filename'">
+			AND FILENAME LIKE '%'||#{search}||'%'
+		</if>
+		<if test="startDate != null and startDate != '' and endDate != null and endDate != ''">
+			AND TO_CHAR(REGDATE, 'YYYYMMDD') BETWEEN #{startDate} AND #{endDate}
+		</if>
+	</select>
+	<insert id="uploadPds" parameterType="bit.com.a.dto.PdsDto">
+		INSERT INTO PDS(SEQ, ID, REF, STEP, DEPTH, TITLE, CONTENT, FILENAME, NEWFILENAME, READCOUNT, DOWNCOUNT, REGDATE)
+ 		VALUES(SEQ_PDS.NEXTVAL, #{id}, (SELECT NVL(MAX(REF),0)+1 FROM PDS), 0, 0, #{title}, #{content}, #{filename}, #{newfilename}, 0, 0, SYSDATE)
+	</insert>
+	<select id="getPds" parameterType="Integer" resultType="bit.com.a.dto.PdsDto">
+		SELECT SEQ, ID, REF, STEP, DEPTH, TITLE, CONTENT, FILENAME, NEWFILENAME, READCOUNT, DOWNCOUNT, REGDATE
+		FROM PDS
+		WHERE SEQ=#{seq}
+	</select>
+	<update id="readcount" parameterType="Integer">
+		UPDATE PDS
+		SET READCOUNT = READCOUNT + 1
+		WHERE SEQ=#{seq}
+	</update>
+	<update id="downcount" parameterType="Integer">
+		UPDATE PDS
+		SET DOWNCOUNT = DOWNCOUNT + 1
+		WHERE SEQ=#{seq}
+	</update>
+	<update id="updatePds" parameterType="bit.com.a.dto.PdsDto">
+		UPDATE PDS
+		SET TITLE=#{title},CONTENT=#{content}
+		<if test="filename != null and filename != '' and newfilename != null and newfilename != ''">
+			,FILENAME=#{filename},NEWFILENAME=#{newfilename}
+		</if>
+		WHERE SEQ=#{seq}
+	</update>
+	<delete id="deletePds" parameterType="Integer">
+		DELETE FROM PDS
+		WHERE SEQ=#{seq}
+	</delete>
+	
+	<update id="addStep" parameterType="bit.com.a.dto.PdsDto">
+		UPDATE PDS
+		SET STEP=STEP+1
+		WHERE REF=(SELECT REF FROM PDS WHERE SEQ=#{ seq })
+			AND STEP > (SELECT STEP FROM PDS WHERE SEQ=#{ seq })
+	</update>
+	
+	<insert id="answerPds" parameterType="bit.com.a.dto.PdsDto">
+		INSERT INTO PDS(SEQ, ID, REF, STEP, DEPTH, TITLE, CONTENT, FILENAME, NEWFILENAME, READCOUNT, DOWNCOUNT, REGDATE)
+ 		VALUES(SEQ_PDS.NEXTVAL, #{id}, (SELECT REF FROM PDS WHERE SEQ=#{ seq }),
+ 									   (SELECT STEP FROM PDS WHERE SEQ=#{ seq }) + 1,
+ 									   (SELECT DEPTH FROM PDS WHERE SEQ=#{ seq }) + 1,
+ 			 						   #{title}, #{content},
+ 			 						   <if test="filename != null and filename != ''">
+ 			 						   	#{filename},
+ 			 						   </if>
+ 			 						   <if test="filename == null or filename == ''">
+ 			 						   	'no',
+ 			 						   </if>
+ 			 						   	#{newfilename}, 0, 0, SYSDATE)
+	</insert>
+  </mapper>

@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+</head>
+<body>
+<div align="center">
+	<h1>상세 자료글</h1>
+	<table border="1">
+			<col width="200"><col width="500">
+		<tr>
+			<th>게시자</th>
+			<td style="text-align: left;">
+				<input type="text" id="id" readonly>
+			</td>
+		</tr>
+		<tr>
+			<th>제목</th>
+			<td style="text-align: left;">
+				<input type="text" id="title" readonly>
+			</td>
+		</tr>
+		<tr>
+			<th>다운로드</th>
+			<td style="text-align: left;">
+				<input type="button" name="btnDown" value="다운로드" onclick="filedown()">
+			</td>
+		</tr>
+		<tr>
+			<th>파일명</th>
+			<td style="text-align: left;"><img src="image/folder.png" width="18px" height="18px">&nbsp;&nbsp;<span id="filename"></span></td>
+		</tr>
+		<tr>
+			<th>다운수</th>
+			<td style="text-align: left;"><span id="downcount"></span></td>
+		</tr>
+		<tr>
+			<th>조회수</th>
+			<td style="text-align: left;"><span id="readcount"></span></td>
+		</tr>
+		<tr>
+			<th>등록일</th>
+			<td style="text-align: left;"><span id="regdate"></span></td>
+		</tr>
+		<tr>
+			<th>내용</th>
+			<td style="text-align: left;">
+				<textarea rows="20" cols="50" readonly="readonly" id="content"></textarea>
+			</td>
+		</tr>
+	</table>
+
+	<div id="buttons">
+		<button type="button" onclick="location.href='pdslist.html'">돌아가기</button>
+		<button type="button" onclick="answer()" id="reply">댓글</button>
+	</div>
+</div>
+<script type="text/javascript">
+let pds_seq;
+$(document).ready(function() {
+	let temp = location.href.split("?");
+	let id = sessionStorage.getItem('login');
+	$.ajax({
+		url:"http://localhost:3000/detailBbs",
+		data: {seq:temp[1]},
+		success:function(pds){
+			$("#id").val(pds.id);
+			$("#title").val(pds.title);
+			$("#filename").text(pds.filename);
+			$("#downcount").text(pds.downcount);
+			$("#readcount").text(pds.readcount);		
+			$("#regdate").text(pds.regdate);
+			$("#content").text(pds.content);
+			pds_seq = pds.seq;
+			if(id == pds.id){
+				let str = '<button type="button" onclick="updateBtn()">수정하기</button>';
+				$("#buttons").append(str);
+			}
+		},
+		error:function(){
+			alert('error');
+		}
+	});	
+});
+function filedown() { //파일다운로드
+	location.href = "http://localhost:3000/fileDownload?seq=" + pds_seq;
+};
+
+function updateBtn() {
+	location.href ="pdsupdate.html?" + pds_seq;
+}
+function answer() {
+	location.href ="reply.html?" + pds_seq;
+}
+</script>
+</body>
+</html>

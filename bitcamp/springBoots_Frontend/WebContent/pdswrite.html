@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+</head>
+<body>
+<div align="center">
+	<form id="upload_file_frm">
+		<h1>파일업로드</h1>
+		<table border="1">
+			<tr>
+				<th>아이디</th>
+				<td style="text-align: left;">
+					<input type="text" id="id" name="id" readonly="readonly" size="50">
+				</td>
+			</tr>
+			<tr>
+				<th>제목</th>
+				<td style="text-align: left;">
+					<input type="text" name="title" size="50">
+				</td>
+			</tr>
+			<tr>
+				<th>파일 업로드</th>
+				<td style="text-align: left">
+					<input type="file" name="uploadFile" style="width: 400px">
+				</td>
+			</tr>
+			<tr>
+				<th>내용</th>
+				<td style="text-align: left;">	<!-- summernote, smart editor - 글자,이미지 같이 올리는 기능 (구글찾아볼것) -->
+					<textarea rows="10" cols="50" name="content"></textarea>
+				</td>
+			</tr>
+			<tr>
+				<td colspan="2" style="height: 50px; text-align: center;">
+					<a href="#none" id="uploadFileBtn" title="자료올리기">
+						<img alt="" src="image/bwrite.png">
+					</a>
+				</td>
+			</tr>
+		</table>
+	</form>
+</div>
+<script type="text/javascript">
+$(document).ready(function() {
+	$('#id').val(sessionStorage.getItem('login'));
+	
+	$("#uploadFileBtn").click(function() {
+		$.ajax({
+			url:"http://localhost:3000/fileUpload",
+			type:"post",
+			data:new FormData( $("#upload_file_frm")[0] ),
+			enctype: 'multipart/form-data',
+			processData:false,
+			contentType:false,
+			cache:false,	// Session와 같이 저장을 위한 것.	session은 서버에 저장. cookie는 브라우저에 저장. cache는 임시저장개념
+			success:function(msg){
+				alert('success');
+				if(msg == 'success'){
+					alert('성공적으로 글작성하였습니다');
+					location.href = "pdslist.html";
+				}else{
+					alert('글작성 실패하셨습니다');
+					location.href = "pdswrite.html";
+				}
+			},
+			error:function(){
+				alert('error');
+			}
+		});
+	});
+});
+</script>
+</body>
+</html>

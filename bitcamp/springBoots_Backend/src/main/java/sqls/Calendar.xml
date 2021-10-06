@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+  <mapper namespace="bit.com.a.dao.CalendarDao">
+  	<select id="getList" parameterType="bit.com.a.dto.CalendarDto" resultType="bit.com.a.dto.CalendarDto">
+ 		SELECT SEQ, ID, TITLE, CONTENT, RDATE, WDATE, IMPORTANT
+ 		FROM (SELECT ROW_NUMBER()OVER(PARTITION BY SUBSTR(RDATE, 1, 8) ORDER BY RDATE ASC) AS RNUM,
+ 					SEQ, ID, TITLE, CONTENT, RDATE, WDATE, IMPORTANT
+ 					FROM CALENDARS
+ 					WHERE ID=#{ id } AND SUBSTR(RDATE, 1, 6)=#{ rdate })
+ 		WHERE RNUM BETWEEN 1 AND 5
+ 	</select>
+ 	<insert id="addCal" parameterType="bit.com.a.dto.CalendarDto">
+ 		INSERT INTO CALENDARS(SEQ, ID, TITLE, CONTENT, RDATE, WDATE, IMPORTANT)
+ 		VALUES(SEQ_CALL.NEXTVAL, #{ id }, #{ title }, #{ content }, #{ rdate }, SYSDATE, #{ important })
+ 	</insert>
+ 	<select id="getCal" parameterType="Integer" resultType="bit.com.a.dto.CalendarDto">
+ 		SELECT *
+ 		FROM CALENDARS
+ 		WHERE SEQ=#{ seq }
+ 	</select>
+ 	<delete id="deleteCal" parameterType="Integer">
+ 		DELETE FROM CALENDARS
+ 		WHERE SEQ=#{ seq }
+ 	</delete>
+ 	<update id="updateCal" parameterType="bit.com.a.dto.CalendarDto">
+ 		UPDATE CALENDARS
+ 		SET TITLE=#{ title }, CONTENT=#{ content }, RDATE=#{ rdate }, IMPORTANT=#{ important }
+ 		WHERE SEQ=#{ seq }
+ 	</update>
+  </mapper>

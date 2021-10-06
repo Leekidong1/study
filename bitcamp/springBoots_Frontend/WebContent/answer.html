@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<style type="text/css">
+li{
+	display: inline-block;
+	list-style: none;
+	margin-left: 30px;
+}
+.navbox{
+	width: 400px;
+	height: 30px;
+	margin: 30px auto;
+	background-color: #E6E6E6;
+	border-radius: 5px;
+	box-shadow: 3px 3px 3px 2px #F2F2F2;
+}
+.list_table{
+	border-collapse: collapse;
+}
+</style>
+</head>
+<body>
+<div class="navbox">
+	<ul class="navbar">
+		<li><a href="bbswrite.html">글쓰기</a></li>
+		<li><a href="bbslist.html">게시판</a></li>
+		<li><a href="#none">로그아웃</a></li>
+	</ul>
+</div>
+
+<div align="center">
+	<h2 style="font-size: 20px;">본문</h2>
+	<table border="1" class="list_table" id="_list_table">
+	<col width="100"><col width="300">
+		<tr>
+			<th>작성자</th>
+			<td><span id="writer"></span></td>	
+		</tr>
+		<tr>
+			<th>제목</th>
+			<td><span id="title"></span></td>	
+		</tr>
+		<tr>
+			<th>작성일</th>
+			<td><span id="date"></span></td>	
+		</tr>
+		<tr>
+			<th>내용</th>
+			<td>
+				<textarea rows="10" cols="50" id="content" readonly></textarea>
+			</td>	
+		</tr>
+	</table>
+
+</div>
+
+
+<div align="center">
+<h2 style="font-size: 20px;">답글</h2>
+	<table border="1" class="list_table" id="_list_table">
+	<col width="100"><col width="300">
+		<tr>
+			<th>아이디</th>
+			<td>
+				<input type="text" id="id" size="30" readonly>
+			</td>
+		</tr>
+		<tr>
+			<th>제목</th>
+			<td>
+				<input type="text" id="_title" size="30">
+			</td>
+		</tr>
+		<tr>
+			<th>내용</th>
+			<td>
+				<textarea rows="20" cols="50" id="_content"></textarea>
+			</td>
+		</tr>
+		<tr>
+			<td colspan="2" align="center">
+				<input type="button" id="writeBtn" value="작성완료">
+			</td>
+		</tr>
+	</table>
+</div>
+<script type="text/javascript">
+$(document).ready(function() {
+	$('#id').val(sessionStorage.getItem('login'));
+	let temp = location.href.split("?");
+	let bbs_seq = '';
+	$.ajax({
+		url:"http://localhost:3000/getBbs",
+		data: {seq:temp[1]},
+		success:function(bbs){
+			$("#writer").text(bbs.id);
+			$("#title").text(bbs.title);
+			$("#date").text(bbs.wdate);
+			$("#content").text(bbs.content);
+			bbs_seq = bbs.seq;
+		},
+		error:function(){
+			alert('error');
+		}
+	});
+
+	$("#writeBtn").click(function() {
+		
+		$.ajax({
+			url:"http://localhost:3000/replyBbs",
+			data: {seq:bbs_seq, id:$("#id").val(), title:$("#_title").val(), content:$("#_content").val() },
+			success:function(msg){
+				if(msg == 'success'){
+					alert('성공적으로 글작성하였습니다');
+					location.href = "bbslist.html";
+				}else{
+					alert('글작성 실패하셨습니다');
+					location.href = "bbsdetail.html?" + bbs_seq;
+				}
+			},
+			error:function(){
+				alert('error');
+			}
+		});
+	});
+});
+</script>
+</body>
+</html>

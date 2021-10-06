@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+</head>
+<body>
+<div align="center">
+	<h1>일정수정</h1>
+	<table border="1" class="list_table" id="_list_table">
+		<col width="100"><col width="300">
+		<tr>
+			<th>아이디</th>
+			<td>
+				<input type="text" size="60" id="id" readonly>
+			</td>
+		</tr>
+		<tr>
+			<th>제목</th>
+			<td>
+				<input type="text" size="60" id="title">
+			</td>
+		</tr>
+		<tr>
+			<th>일정</th>
+			<td style="text-align: left">
+				<select name="year" id="year">
+				</select>년
+				
+				<select name="month" id="month">
+				</select>월
+				
+				<select name="day" id="day"> 
+				</select>일
+				
+				<select name="hour" id="hour">
+				</select>시
+				
+				<select name="min" id="min">
+				</select>분
+			</td>
+		</tr>
+		<tr>
+			<th>내용</th>
+			<td style="text-align: left">
+				<textarea rows="20" cols="60" id="content"></textarea>
+			</td>
+		</tr>
+		<tr>
+			<th>중요도</th>
+			<td style="text-align: left">
+			<select name="important" id="important" style="background-color: green; color: white;">
+				<option style="background-color: red; color: white;" value="verymuch">가장중요</option>
+				<option style="background-color: blue; color: white;" value="very">중요</option>
+				<option style="background-color: green; color: white;" value="normal" selected="selected">보통</option>
+			</select>
+			</td>
+		</tr>
+		<tr>
+			<td colspan="2">
+				<input type="button" onclick="updateInfo()" value="수정완료"> 
+			</td>
+		</tr>
+	</table>
+</div>
+<script type="text/javascript">
+let cal_seq;
+$(document).ready(function() {
+	let temp = location.href.split("?");
+	cal_seq = temp[1];
+	
+	$("select[name='month']").change(setMonth);
+	$("select[name='important']").change(setColor);
+	
+	$.ajax({
+		url:"http://localhost:3000/caldetail",
+		data: {seq:cal_seq},
+		success:function(cal){
+			$("#id").val(cal.id);
+			$("#title").val(cal.title);
+			setCal(cal.rdate.substring(0, 4), 
+				   cal.rdate.substring(4, 6), 
+				   cal.rdate.substring(6, 8),
+				   cal.rdate.substring(8, 10),
+				   cal.rdate.substring(10))
+			
+			$("#content").text(cal.content);
+			if(cal.important == 'verymuch'){
+				$("#important").val(cal.important).css('background-color','red').css('color','white');
+			}else if(cal.important == 'very'){
+				$("#important").val(cal.important).css('background-color','blue').css('color','white');
+			}else{
+				$("#important").val(cal.important).css('background-color','green').css('color','white');
+			}
+			
+		},
+		error:function(){
+			
+		}
+	});
+});
+
+function updateInfo() {
+	$.ajax({
+		url:"http://localhost:3000/calupdate",
+		data:{seq:cal_seq, id:$("#id").val(), title:$("#title").val(), year:$("#year").val(), month:$("#month").val(), day:$("#day").val(),
+			hour:$("#hour").val(), min:$("#min").val(), content:$("#content").val(), important:$("#important").val()},
+		success:function(msg){
+			if(msg == 'success'){
+				alert('성공적으로 일정수정하였습니다');
+				location.href = "calendar.html";
+			}else{
+				alert('일정수정 실패하셨습니다');
+				location.href = "calupdate.html?" + cal_seq;
+			}
+		},
+		error:function(){
+			alert('error');
+		}
+	});
+}
+
+
+function setCal(year, month, day, hour, min) {
+//	alert(year + " " + month + " " + day + " " + hour + " " + min);
+	
+	let yearstr = '';
+	for(i = year-5; i <= year; i++){
+		if(year == i){
+			yearstr += '<option selected="selected" value="' + i + '">' + i + '</option>';	
+		}else{
+			yearstr += '<option value="' + i + '">' + i + '</option>';
+		}
+	}
+	$("select[name='year']").html(yearstr);
+	
+	let monthstr = '';
+	for(i = 1; i <= 12; i++){
+		if(month == i){
+			monthstr += '<option selected="selected" value="' + i + '">' + i + '</option>';	
+		}else{
+			monthstr += '<option value="' + i + '">' + i + '</option>';
+		}
+	}
+	$("select[name='month']").html(monthstr);
+	
+	let daystr = '';
+	for(i = 1; i <= (new Date(year, month, 0)).getDate(); i++){
+		if(day == i){
+			daystr += '<option selected="selected" value="' + i + '">' + i + '</option>';	
+		}else{
+			daystr += '<option value="' + i + '">' + i + '</option>';
+		}
+	}
+	$("select[name='day']").html(daystr);
+	
+	let hourstr = '';
+	for(i = 1; i < 24; i++){
+		if(hour == i){
+			hourstr += '<option selected="selected" value="' + i + '">' + i + '</option>';	
+		}else{
+			hourstr += '<option value="' + i + '">' + i + '</option>';
+		}
+	}
+	$("select[name='hour']").html(hourstr);
+	
+	let minstr = '';
+	for(i = 0; i < 60; i++){
+		if(min == i){
+			minstr += '<option selected="selected" value="' + i + '">' + i + '</option>';	
+		}else{
+			minstr += '<option value="' + i + '">' + i + '</option>';
+		}
+	}
+	$("select[name='min']").html(minstr);
+	
+}
+function setMonth() {
+	let year = $("select[name='year']").val();	//윤달까지 체크하기위해서 년도 걸림
+	let month = $("select[name='month']").val();
+
+	let lastday = (new Date(year, month, 0)).getDate();
+	//날짜 적용
+	let str = '';
+	for(i = 1; i <= lastday; i++){
+		str += "<option value='" + i + "'>" + i + "</option>";
+	}
+	
+	$("select[name='day']").html(str);
+}
+function setColor() {
+	let val = $("select[name='important']").val();
+	if(val == 'verymuch'){
+		$('#important').css("background-color", "red");
+	}else if(val == 'very'){
+		$('#important').css("background-color", "blue");
+	}else if(val == 'normal'){
+		$('#important').css("background-color", "green");
+	}
+	$('#important').css("color", "white");
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<style type="text/css">
+li{
+	display: inline-block;
+	list-style: none;
+	margin-left: 30px;
+}
+.navbox{
+	width: 400px;
+	height: 30px;
+	margin: 30px auto;
+	background-color: #E6E6E6;
+	border-radius: 5px;
+	box-shadow: 3px 3px 3px 2px #F2F2F2;
+}
+.list_table{
+	border-collapse: collapse;
+}
+</style>
+</head>
+<body>
+<div class="navbox">
+	<ul class="navbar">
+		<li><a href="bbswrite.html">글쓰기</a></li>
+		<li><a href="bbslist.html">게시판</a></li>
+		<li><a href="#none">로그아웃</a></li>
+	</ul>
+</div>
+
+<div align="center">
+	<table border="1">
+		<col width="200"><col width="500">
+		<tr>
+			<th>작성자</th>
+			<td style="text-align: left">
+				<input type="text" id="id" readonly>
+			</td>
+		</tr>
+		<tr>
+			<th>제목</th>
+			<td style="text-align: left">
+				<input type="text" id="title" readonly>
+			</td>
+		</tr>
+		<tr>
+			<th>작성일</th>
+			<td style="text-align: left">
+				<input type="text" id="date" readonly>
+			</td>
+		</tr>
+		<tr>
+			<th>조회수</th>
+			<td style="text-align: left">
+				<input type="text" id="count" readonly>
+			</td>
+		</tr>
+		<tr>
+			<th>정보</th>
+			<td style="text-align: left">
+				<input type="text" id="info" readonly>
+			</td>
+		</tr>
+		<tr>
+			<th>내용</th>
+			<td style="text-align: left">
+				<textarea rows="20px" cols="80px" id="content" readonly></textarea>
+			</td>
+		</tr>
+	</table>
+	<div id="buttons">
+		<button type="button" onclick="before()">글목록</button>
+		<button type="button" onclick="answerBbs(this.value)" id="reply">댓글</button>
+	</div>
+</div>	
+<script type="text/javascript">
+$(document).ready(function() {
+	let temp = location.href.split("?");
+	let id = sessionStorage.getItem('login');
+	$.ajax({
+		url:"http://localhost:3000/getBbs",
+		data: {seq:temp[1]},
+		success:function(bbs){
+			$("#id").val(bbs.id);
+			$("#title").val(bbs.title);
+			$("#date").val(bbs.wdate);
+			$("#count").val(bbs.readcount);
+			$("#info").val(bbs.ref + '-' + bbs.step + '-' + bbs.depth);
+			$("#content").text(bbs.content);
+			$("#reply").val(bbs.seq);
+			if(id == bbs.id){
+				let str = '<button type="button" onclick="updateBtn(' + bbs.seq + ')">수정하기</button>&nbsp;' +
+						  '<button type="button" onclick="del(' + bbs.seq + ')">삭제</button>';
+				$("#buttons").append(str);
+			}
+		},
+		error:function(){
+			
+		}
+	});	
+});
+
+function before() {
+	location.href ="bbslist.html";
+}
+function updateBtn(seq) {
+	location.href ="bbsupdate.html?" + seq;
+}
+function del(bbs_seq) {	// ajax 필요
+	$.ajax({
+		url:"http://localhost:3000/bbsdelete",
+		data:{seq:bbs_seq},
+		success:function(msg){
+			if(msg == 'success'){
+				alert('성공적으로 글삭제하였습니다');
+				location.href = "bbslist.html";
+			}else{
+				alert('글삭제 실패하셨습니다');
+				location.href = "bbslist.html";
+			}
+		},
+		error:function(){
+			alert('error');
+		}
+	});
+}
+function answerBbs(seq) {
+	location.href ="answer.html?" + seq;
+}
+</script>
+</body>
+</html>
