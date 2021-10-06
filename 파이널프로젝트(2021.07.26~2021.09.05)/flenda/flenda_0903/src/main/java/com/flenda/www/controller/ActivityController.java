@@ -64,6 +64,7 @@ public class ActivityController {
 	@RequestMapping(value = "managemnetAct.do", method = { RequestMethod.POST, RequestMethod.GET})
 	public Map<String,Object> managemnetAct(SearchParam param) {
 		System.out.println("ActivityController managemnetAct()");
+		System.out.println("ActivityController managemnetAct()");
 		
 		System.out.println("param:" + param.toString());
 		 

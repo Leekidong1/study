@@ -6,6 +6,6 @@
 		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.3.xsd">
 
 	<bean id="pencil" class="com.example.demo.Pencil">
-		<property name="action" value="쓰다"/>
+		<property name="action" value="쓰고읽다"/>
 	</bean>
 </beans>
