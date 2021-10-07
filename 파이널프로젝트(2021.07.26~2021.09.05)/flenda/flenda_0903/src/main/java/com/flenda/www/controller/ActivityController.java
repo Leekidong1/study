@@ -214,6 +214,7 @@ public class ActivityController {
 	@RequestMapping(value = "deleteAct.do", method = {RequestMethod.GET,RequestMethod.POST})
 	public String deleteAct(int seq) {
 		System.out.println("ActivityController deleteAct");
+		System.out.println("ActivityController deleteAct");
 		String msg = "";
 		String deleteAct = "";
 		String deleteOp = "";
