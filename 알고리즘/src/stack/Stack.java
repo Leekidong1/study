@@ -18,14 +18,16 @@ public class Stack {
 			System.out.println("full of Stack");
 			return;
 		}
+		
 		for(int node : arr) {
 			System.out.print(node+" ");
 		}
 		System.out.println(" index : "+ top);
 	}
+	
 	public void pop() {
 		if(top > 0) {
-			System.out.println(top-1+"번 째 값인"+arr[top-1]+"을 pop합니다.");
+			System.out.println(top+"번 째 값인"+arr[top-1]+"을 pop합니다.");
 			arr[--top] = 0;
 		}else {
 			System.out.println("no more datas");
@@ -36,12 +38,14 @@ public class Stack {
 		}
 		System.out.println(" index : "+ top);		
 	}
+	
 	public int peek() {
 		if(arr != null) {
 			return arr[top-1];
 		}
 		return -1;
 	}
+	
 	public void isEmpty() {
 		if(top == 0) {
 			System.out.println("Stack이 비어있습니다.");
