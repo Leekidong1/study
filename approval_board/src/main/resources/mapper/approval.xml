@@ -1,0 +1,229 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="approval">
+
+	<resultMap type="map" id="mapList">
+		<result column="idx" property="idx" />
+		<result column="seq" property="seq" />
+		<result column="write_id" property="writeId" />
+		<result column="appr_subject" property="apprSubject" />
+		<result column="appr_content" property="apprContent" />
+		<result column="appr_reg_date" property="apprRegdate" />
+		<result column="appr_date" property="apprDate" />
+		<result column="appr_apper" property="apprApper" />
+		<result column="appr_status" property="apprStatus" />
+	</resultMap>
+	
+	<resultMap type="map" id="histList">
+		<result column="his_seq" property="seq" />
+		<result column="his_app_date" property="histApprDate" />
+		<result column="hist_apper" property="histAppr" />
+		<result column="hist_status" property="histStatus" />
+	</resultMap>
+	
+	<select id="list" parameterType="map" resultMap="mapList">
+	  select
+	  		a.idx
+	  	   ,seq
+	  	   ,a.write_id
+	  	   ,a.appr_subject
+	       ,a.appr_content
+	       ,a.appr_reg_date
+	       ,a.appr_date
+	       ,a.appr_apper
+	       ,a.appr_status
+	  from (select
+			     row_number()over(order by appr_reg_date desc) as idx
+			    ,seq 
+			    ,write_id
+			    ,appr_subject
+			    ,appr_content
+			    ,appr_reg_date
+			    ,appr_date
+			    ,appr_apper
+			    ,decode(appr_status, 'tmp','임시저장',
+			                         'wat','결재대기',
+			                         'ing','결재중',
+			                         'end','결재완료',
+			                         'ret','반려') as appr_status
+			from study_approval_list
+			where 1=1
+			<if test="choice == 'memId'">
+				and write_id like '%'||#{ search }||'%'
+			</if>
+			<if test="choice == 'approvaler'">
+				and appr_apper like '%'||#{ search }||'%'
+			</if>
+			<if test="startdate != null and startdate != '' and enddate != null and enddate != ''">
+				and to_char(appr_reg_date, 'YYYY-MM-DD') between #{ startdate } and #{ enddate }
+			</if>
+			<if test="approval != null and approval != ''">
+				and appr_status like '%'||#{ approval }||'%'
+			</if>
+			<if test="choice == 'boardCntSub'">
+				and appr_subject like '%'||#{ search }||'%'
+				or appr_content like '%'||#{ search }||'%'
+			</if>
+				<!-- 조회하기 시작 -->
+				and write_id = #{memId}
+			<if test="memRank == 'ba'">
+			    or appr_status in ('ing','end')	<!-- 부장들 전체  결재중, 완료 확인가능  -->
+			    or seq in ( select a.seq
+		                      from study_approval_list a
+		                      join study_approval_member b on a.appr_apper = b.mem_id
+		                     where a.appr_status = 'ret'
+		                       and b.mem_rank != 'ga'
+			              )	<!-- 부장이한 반려는 부장들 전체가 확인가능  -->
+			</if>      
+			<if test="memRank == 'ga'">
+			    or appr_status = 'wat'	<!-- 과장들 전체 결재대기글 확인가능  -->
+			    or appr_apper = #{memId} <!-- 자신이 결재한 결재중, 반려 확인가능  -->
+			    or seq in ( select a.appr_seq
+		                      from study_approval_history a
+		                      join study_approval_history b on a.appr_seq = b.appr_seq
+		                     where a.hist_apper = #{memId} 
+		                       and b.hist_status = 'end'
+		                     group by a.appr_seq
+			              ) <!-- 자신이 결재했던 결재들중에서 결재완료된거 확인가능  -->
+			</if>
+			) a
+		where a.idx between 1 + (10*(#{ pageNumber }-1)) and 10 + (10*(#{ pageNumber }-1))
+	</select>
+	
+	<select id="pageNums" parameterType="map" resultType="Integer">
+		select nvl(count(*), 0)
+		from study_approval_list
+		where 1=1
+		<if test="choice == 'memId'">
+			and write_id like '%'||#{ search }||'%'
+		</if>
+		<if test="choice == 'approvaler'">
+			and appr_apper like '%'||#{ search }||'%'
+		</if>
+		<if test="startdate != null and startdate != '' and enddate != null and enddate != ''">
+			and to_char(appr_reg_date, 'YYYY-MM-DD') between #{ startdate } and #{ enddate }
+		</if>
+		<if test="approval != null and approval != ''">
+			and appr_status like '%'||#{ approval }||'%'
+		</if>
+		<if test="memRank == 'sa' or memRank == 'da'">
+			and write_id = #{ memId }
+		</if>
+		<if test="choice == 'boardCntSub'">
+			and appr_subject like '%'||#{ search }||'%'
+			or appr_content like '%'||#{ search }||'%'
+		</if>
+			and write_id = #{memId}
+		<if test="memRank == 'ba'">
+		    or appr_status in ('ing','end')	<!-- 부장들 전체  결재중, 완료 확인가능  -->
+		    or seq in ( select a.seq
+	                      from study_approval_list a
+	                      join study_approval_member b on a.appr_apper = b.mem_id
+	                     where a.appr_status = 'ret'
+	                       and b.mem_rank != 'ga'
+		              )	<!-- 부장이한 반려는 부장들 전체가 확인가능  -->
+		</if>      
+		<if test="memRank == 'ga'">
+		    or appr_status = 'wat'	<!-- 과장들 전체 결재대기글 확인가능  -->
+		    or appr_apper = #{memId} <!-- 자신이 결재한 결재중, 반려 확인가능  -->
+		    or seq in ( select a.appr_seq
+	                      from study_approval_history a
+	                      join study_approval_history b on a.appr_seq = b.appr_seq
+	                     where a.hist_apper = #{memId} 
+	                       and b.hist_status = 'end'
+	                     group by a.appr_seq
+		              ) <!-- 자신이 결재했던 결재들중에서 결재완료된거 확인가능  -->
+		</if>
+	</select>
+	
+	<select id="getNextSeq" resultType="Integer">
+		select nvl(max(seq), 0) + 1 from study_approval_list
+	</select>
+
+	<select id="histList" parameterType="Integer" resultMap="histList">
+		select
+			his_seq
+		   ,his_app_date
+		   ,hist_apper
+		   ,decode(hist_status, 'tmp','임시저장',
+	                            'wat','결재대기',
+	                            'ing','결재중',
+	                            'end','결재완료',
+	                            'ret','반려') as hist_status
+		from study_approval_history
+		where appr_seq = #{seq}
+		order by his_seq desc, his_app_date desc
+	</select>
+	
+	<insert id="insertAppr" parameterType="map">
+		insert into study_approval_list(seq
+										,write_id
+										,appr_subject
+										,appr_content
+										,appr_status
+										,appr_reg_date
+										<if test="nextStatus != 'tmp'">
+										,appr_date
+										,appr_apper
+										</if>)
+		values(
+				#{apprSeq}
+				, #{writer}
+				, #{subject}
+				, #{content}
+				, #{nextStatus}
+				, sysdate
+				<if test="nextStatus != 'tmp'">
+				, sysdate
+				, #{apprer}
+				</if>
+			  )
+	</insert>
+	
+	<insert id="insertHist" parameterType="map">
+		insert into study_approval_history(his_seq
+										  ,appr_seq
+									      ,his_app_date
+										  ,hist_apper
+										  ,hist_status)
+		values(
+				(select nvl(max(his_seq),0)+1 
+				 from study_approval_history
+				 where appr_seq = #{apprSeq})
+				, #{apprSeq}
+				, to_char(sysdate, 'yyyy-mm-dd')
+				, #{apprer}
+				, #{nextStatus}
+			  )
+	</insert>
+	
+	<update id="updateHist" parameterType="map">
+		update study_approval_history
+		set 
+		    appr_subject = #{subject}
+		   ,appr_content = #{content}
+
+		   ,appr_status = #{nextStatus}
+		where appr_seq = #{apprSeq}
+	</update>
+	
+	<update id="updateAppr" parameterType="map">
+		update study_approval_list
+		set 
+		    appr_subject = #{subject}
+		   ,appr_content = #{content}
+		   <choose>
+		   	<when test="nextStatus == 'tmp'">
+		   ,appr_date = null
+		   ,appr_apper = null		   	
+		   	</when>
+		   	<otherwise>
+		   ,appr_date = sysdate
+		   ,appr_apper = #{apprer}
+		   	</otherwise>
+		   </choose>
+		   ,appr_status = #{nextStatus}
+		where seq = #{apprSeq}
+	</update>
+	
+</mapper>
