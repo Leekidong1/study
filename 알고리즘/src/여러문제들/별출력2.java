@@ -1,4 +1,4 @@
-package 알고리즘;
+package 여러문제들;
 
 public class 별출력2 {
 

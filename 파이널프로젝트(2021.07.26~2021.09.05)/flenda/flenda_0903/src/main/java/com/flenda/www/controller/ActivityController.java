@@ -64,6 +64,7 @@ public class ActivityController {
 	@RequestMapping(value = "managemnetAct.do", method = { RequestMethod.POST, RequestMethod.GET})
 	public Map<String,Object> managemnetAct(SearchParam param) {
 		System.out.println("ActivityController managemnetAct()");
+		System.out.println("ActivityController managemnetAct()");
 		
 		System.out.println("param:" + param.toString());
 		 
@@ -212,6 +213,7 @@ public class ActivityController {
 	@ResponseBody
 	@RequestMapping(value = "deleteAct.do", method = {RequestMethod.GET,RequestMethod.POST})
 	public String deleteAct(int seq) {
+		System.out.println("ActivityController deleteAct");
 		System.out.println("ActivityController deleteAct");
 		String msg = "";
 		String deleteAct = "";

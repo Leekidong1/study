@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="mapper">
+	
+	<resultMap type="map" id="mapList">
+		<result column="seq" property="seq"/>
+		<result column="mem_id" property="memId"/>
+		<result column="mem_name" property="memName"/>
+		<result column="board_subject" property="boardSubject"/>
+		<result column="board_content" property="boardContent"/>
+		<result column="reg_date" property="regDate"/>
+		<result column="upt_date" property="uptDate"/>
+		<result column="view_cnt" property="viewCnt"/>
+	</resultMap>
+	
+	<resultMap type="map" id="fileList">
+		<result column="file_seq" property="fileSeq"/>
+		<result column="real_name" property="realName"/>
+		<result column="save_name" property="saveName"/>
+		<result column="reg_date" property="regDate"/>
+		<result column="save_path" property="savePath"/>
+		<result column="list_seq" property="listSeq"/>
+	</resultMap>
+
+	<select id="list" parameterType="map" resultMap="mapList">
+		select
+			seq
+			,mem_id
+			,mem_name
+			,board_subject
+			,board_content
+			,reg_date
+			,upt_date
+			,view_cnt
+		from (select row_number()over(order by reg_date desc) as rnum
+					 ,seq
+					 ,mem_id
+					 ,mem_name
+					 ,board_subject
+					 ,board_content
+					 ,reg_date
+					 ,upt_date
+					 ,view_cnt
+				from board_study
+				where 1=1
+				<if test="choice == 'memid'">
+					and mem_id like '%'||#{ search }||'%'
+				</if>
+				<if test="choice == 'boardSubject'">
+					and board_subject like '%'||#{ search }||'%'
+				</if>
+				<if test="choice == 'boardCntSub'">
+					and board_subject like '%'||#{ search }||'%'
+					or board_content like '%'||#{ search }||'%'
+				</if>
+				<if test="startdate != null and startdate != '' and enddate != null and enddate != ''">
+					and to_char(reg_date, 'YYYY-MM-DD') between #{ startdate } and #{ enddate }
+				</if>
+			 )
+		where rnum between 1 + (10*(#{ pageNumber }-1)) and 10 + (10*(#{ pageNumber }-1))
+	</select>
+	
+	<select id="pageNums" parameterType="map" resultType="Integer">
+		select nvl(count(*), 0)
+		from board_study
+		where 1=1
+		<if test="choice == 'memid'">
+			and mem_id like '%'||#{ search }||'%'
+		</if>
+		<if test="choice == 'boardSubject'">
+			and board_subject like '%'||#{ search }||'%'
+		</if>
+		<if test="choice == 'boardCntSub'">
+			and board_subject like '%'||#{ search }||'%'
+			or board_content like '%'||#{ search }||'%'
+		</if>
+		<if test="startdate != null and startdate != '' and enddate != null and enddate != ''">
+			and to_char(reg_date, 'YYYY-MM-DD') between #{ startdate } and #{ enddate }
+		</if>
+	</select>
+	
+	<insert id="write" parameterType="map">
+		insert into board_study(seq, mem_id, mem_name, board_subject, board_content, reg_date,  view_cnt)
+		values(
+				(select nvl(max(seq),0)+1 from board_study)
+				, #{ memId }
+				, #{ memName }
+				, #{ boardSubject }
+				, #{ boardContent }
+				, SYSDATE
+				, 0
+				)
+	</insert>
+	
+	<insert id="uploadFile" parameterType="map">
+		insert into file_study_table(file_seq, real_name, save_name, reg_date, save_path, list_seq)
+		values(
+				(select nvl(max(file_seq),0)+1 from file_study_table)
+				, #{ originalName }
+				, #{ newfilename }
+				, SYSDATE
+				, #{ fupload }
+				, (select max(seq) from board_study)
+				)
+	</insert>
+	
+	<select id="detail" parameterType="Integer" resultType="com.kidong.board.dto.BoardDto">
+		select
+			seq
+			,mem_id as memId
+			,mem_name as memName
+			,board_subject as boardSubject
+			,board_content as boardContent
+			,reg_date as regDate
+			,upt_date as uptDate
+			,view_cnt as viewCnt
+		from board_study
+		where seq = #{ seq }
+	</select>
+	
+	<select id="getFile" parameterType="Integer" resultMap="fileList">
+		select
+			file_seq
+			,real_name
+			,save_name
+			,reg_date
+			,save_path
+			,list_seq
+		from file_study_table
+		where list_seq = #{ seq }
+	</select>
+	
+	<delete id="delete" parameterType="String">
+		delete from board_study
+		where seq = #{ seq }
+	</delete>
+	
+	<delete id="mutiDelete" parameterType="java.util.Arrays">
+		delete from board_study
+		where seq in
+		<foreach collection="array" item="seq" open="(" close=")" separator=",">
+			#{ seq }
+		</foreach>
+	</delete>
+	
+	<update id="update" parameterType="map">
+		update board_study
+		set mem_id = #{ memId }
+		    ,mem_name = #{ memName }
+		    ,board_subject = #{ boardSubject }
+		    ,board_content = #{ boardContent }
+		    ,upt_date = SYSDATE
+		where seq = #{ seq }
+	</update>
+</mapper>
