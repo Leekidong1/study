@@ -20,7 +20,6 @@ public class WebSecurityConfig {
 	@Bean
 	public SecurityFilterChain configure(HttpSecurity http) throws Exception {
 		log.info("======Spring Security START=========");
-		log.info("======Spring Security START=========");
 		http.csrf().disable();
 		http.authorizeRequests()
 				.antMatchers("/","/home","/css/**").permitAll()
