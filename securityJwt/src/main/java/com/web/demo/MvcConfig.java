@@ -8,7 +8,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @Configuration
 public class MvcConfig implements WebMvcConfigurer {
 	
-	public void addViewControllers(ViewResolverRegistry registry) {
+	public void confiureViewResolver(ViewResolverRegistry registry) {
 		MustacheViewResolver resolver = new MustacheViewResolver();
 		resolver.setCharset("UTF-8");
 		resolver.setContentType("text/html; charset=UTF-8");

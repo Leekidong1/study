@@ -3,9 +3,10 @@
 
 <mapper namespace="com.web.demo.repository.UserDao">
     <select id="selectList" parameterType="com.web.demo.model.UserDto" resultType="com.web.demo.model.UserDto">
-        select id
-             , pw
-             , auth
-          from users
+        select username
+             , password
+             , role
+             , createdate
+          from abc_user
     </select>
 </mapper>
