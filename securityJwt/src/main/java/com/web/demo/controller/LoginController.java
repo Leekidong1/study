@@ -98,4 +98,5 @@ public class LoginController {
 	public @ResponseBody String data() {
 		return "데이터정보";
 	}
+	
 }

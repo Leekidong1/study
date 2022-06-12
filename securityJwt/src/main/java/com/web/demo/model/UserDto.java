@@ -2,6 +2,9 @@ package com.web.demo.model;
 
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -46,7 +49,14 @@ public class UserDto {
 //		this.role = role;
 //		this.createDate = createDate;
 //	}
-
+	
+	public List<String> getRoleList() {
+		if (this.role.length() > 0) {
+			return Arrays.asList(this.role.split(","));
+		}
+		return new ArrayList<String>();
+	}
+	
 	public String getUsername() {
 		return username;
 	}
