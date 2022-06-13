@@ -19,16 +19,21 @@ public class PrincipalDetails implements UserDetails {
 		this.user = user;
 	}
 	
+	public UserDto getUser() {
+		return user;
+	}
+	
+	public void setUser(UserDto user) {
+		this.user = user;
+	}
+
 	@Override
 	public Collection<? extends GrantedAuthority> getAuthorities() { // roles of User
-		Collection<GrantedAuthority> collect = new ArrayList<GrantedAuthority>();
-		collect.add(new GrantedAuthority() {
-			@Override
-			public String getAuthority() {
-				return user.getRole();
-			}
+		Collection<GrantedAuthority> authorities = new ArrayList<GrantedAuthority>();
+		user.getRoleList().forEach(r->{
+			authorities.add(()->r);
 		});
-		return collect;
+		return authorities;
 	}
 
 	@Override

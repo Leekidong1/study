@@ -27,6 +27,7 @@ public class PrincipalDetailsService implements UserDetailsService {
 	
 	@Override
 	public UserDetails loadUserByUsername(String username) {
+		System.out.println("PrincipalDetailsService 의 loadUserByUsername");
 		UserDto userEntity = userDao.findByUsername(username);
 		if (userEntity != null) {
 			return new PrincipalDetails(userEntity);
