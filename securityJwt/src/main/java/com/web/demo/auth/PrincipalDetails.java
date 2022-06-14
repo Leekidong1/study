@@ -11,6 +11,7 @@ import com.web.demo.model.UserDto;
 /* Security Session에 유저정보를 담기위해서 
  * 유저정보를 UserDetails 형태로 변환해주는 역할
  * */
+@SuppressWarnings("serial")
 public class PrincipalDetails implements UserDetails {
 	
 	private UserDto user; // 콤포지션
@@ -30,8 +31,8 @@ public class PrincipalDetails implements UserDetails {
 	@Override
 	public Collection<? extends GrantedAuthority> getAuthorities() { // roles of User
 		Collection<GrantedAuthority> authorities = new ArrayList<GrantedAuthority>();
-		user.getRoleList().forEach(r->{
-			authorities.add(()->r);
+		user.getRoleList().forEach(r -> {
+			authorities.add(()->{return r;});
 		});
 		return authorities;
 	}

@@ -21,12 +21,12 @@ public class JwtFilter3 implements Filter {
 		HttpServletResponse res = (HttpServletResponse)response;
 		res.setCharacterEncoding("UTF-8");
 		res.setContentType("text/html; charset=UTF-8");
-		
+	
 		if ("POST".equals(req.getMethod())) {
 			String headerAuth = req.getHeader("Authorization");
 			System.out.println(headerAuth);
 			
-			if ("this_is_token".equals(headerAuth)) {
+			if ("Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJjdXN0b21lclRva2VuIiwiaWQiOjEsImV4cCI6MTY1NTIxMDExOCwidXNlcm5hbWUiOiJ0ZXN0In0.hhcEQXMvNIlscNkVxriZsTT_sCCLuCyn7BysCBMiF_jI1z0r-5PzXJmV0HzjN4hMQxi5jWnubnq415dAk2zxPA".equals(headerAuth)) {
 				chain.doFilter(req, res);
 			} else {
 				PrintWriter msg = res.getWriter();

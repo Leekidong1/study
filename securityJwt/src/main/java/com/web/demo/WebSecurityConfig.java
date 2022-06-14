@@ -20,16 +20,21 @@ import org.springframework.security.web.authentication.www.BasicAuthenticationFi
 import com.web.demo.filter.JwtFilter3;
 import com.web.demo.jwt.CorsConfig;
 import com.web.demo.jwt.JwtAuthenticationFilter;
+import com.web.demo.jwt.JwtAuthorizationFilter;
+import com.web.demo.repository.JpaUserDao;
 
 @Configuration
 @EnableWebSecurity // 스피링 시큐리티 필터가 스프링 필터체인에 등록한다.
-@EnableGlobalMethodSecurity(securedEnabled = true, prePostEnabled = true) // secured 어노테이션 활성화, preAuthorize 어노테이션 활성화)
+//@EnableGlobalMethodSecurity(securedEnabled = true, prePostEnabled = true) // secured 어노테이션 활성화, preAuthorize 어노테이션 활성화)
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 		
 	private static final Logger log = LoggerFactory.getLogger(WebSecurityConfig.class);
 	
 	@Autowired
 	private CorsConfig corsConfig;
+	
+	@Autowired
+	private JpaUserDao jpaUserRepository;
 	
 	// 해당 메서드의 리턴되는 오브젝트를 IoC로 등록
 	@Bean
@@ -57,14 +62,16 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
-		http.addFilterBefore(new JwtFilter3(), BasicAuthenticationFilter.class);
-		http.csrf().disable();
-		http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS) // Session 않쓴다는 의미
+//		http.addFilterBefore(new JwtFilter3(), BasicAuthenticationFilter.class);
+	http
+		.csrf().disable()
+		.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS) // Session 않쓴다는 의미
 		.and()
 		.addFilter(corsConfig.corsFilter()) // @CrossOrigin(인증X), 시큐리티 필터에 드록 인증(O)
 		.formLogin().disable()
 		.httpBasic().disable() // 기본인증 방식 사용 X Bearer 인증 방식 사용 예정.
 		.addFilter(new JwtAuthenticationFilter(authenticationManager())) // AuthenticationManager
+		.addFilter(new JwtAuthorizationFilter(authenticationManager(), jpaUserRepository)) // AuthenticationManager
 		.authorizeRequests()
 		.antMatchers("/api/v1/user/**")
 		.access("hasRole('USER') or hasRole('MANAGER') or hasRole('ADMIN')")

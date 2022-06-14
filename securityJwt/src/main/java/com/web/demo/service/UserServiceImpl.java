@@ -34,7 +34,7 @@ public class UserServiceImpl implements UserService {
 		String encPassword = bCryptPasswordEncoder.encode(orgPassword);
 		user.setPassword(encPassword);
 		
-		user.setRole("USER");
+		user.setRole("ROLE_USER");
 		jpaUserDao.save(user);
 	}
 
